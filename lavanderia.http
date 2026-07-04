@@ -1,6 +1,0 @@
-@lavanderia_HostAddress = http://localhost:5196
-
-GET {{lavanderia_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
