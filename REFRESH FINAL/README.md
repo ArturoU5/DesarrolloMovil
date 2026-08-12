@@ -1,312 +1,325 @@
-# RefreshProClean 🧺
 
-Aplicación móvil (**React Native + TypeScript**, con Expo) para la gestión de
-**solicitudes de servicio** de una lavandería (RefreshProClean). Permite
-registrar, listar, filtrar, actualizar y eliminar solicitudes de atención de
-clientes, reemplazando el registro informal por WhatsApp/llamadas.
+# RefreshProClean — DesarrolloMovil 🧺
 
-**Core de negocio elegido:** Lavandería.
+Proyecto académico del curso **Desarrollo de Aplicaciones Móviles**, compuesto
+por dos partes ubicadas en ramas distintas del repositorio:
 
-> Proyecto académico — Curso **Desarrollo de Aplicaciones Móviles 1**.
->
-> **v2 (entrega preliminar):** las solicitudes ahora se persisten
-> localmente con **SQLite** (antes vivían solo en memoria con
-> `useState`/`useReducer`), y se agregó una pantalla de **Catálogo** que
-> consume una **API REST** pública con estados de carga y error, y una
-> pantalla de **Perfil**. El modelo de datos (`Usuario`, `Servicio`,
-> `Solicitud`) está inspirado en el esquema SQL `RefreshProCleanDB`
-> (tablas `Usuarios`, `Servicios`, `Reservas`).
+| Rama | Carpeta | Contenido |
+|---|---|---|
+| `BackEnd` | raíz del repo | API REST en **ASP.NET Core (.NET 10)** con Entity Framework Core y SQL Server |
+| `FrontEnd` | `REFRESH FINAL/` | App móvil en **React Native + TypeScript (Expo)**, con persistencia local en **SQLite** y consumo de una **API REST** pública |
 
-## Integrantes del equipo
-- Integrante 1 — (completar nombre y rol)
-- Integrante 2 — (completar nombre y rol)
-- Integrante 3 — (completar nombre y rol)
+El caso de negocio elegido es una **lavandería (RefreshProClean)**: la app
+permite registrar, listar, filtrar, actualizar y eliminar solicitudes de
+servicio de los clientes, reemplazando el registro informal por
+WhatsApp/llamadas.
 
----
-
-## ⚠️ Leer antes de empezar (para evitar problemas comunes)
-
-Si sigues estos 4 puntos desde el principio, la instalación toma 10-15
-minutos sin sobresaltos. Si los ignoras, es probable que te encuentres con
-los mismos errores que ya resolvimos durante el desarrollo:
-
-1. **Necesitas al menos 10-15 GB libres en tu disco `C:`.** Con menos de
-   eso, `npm install` puede fallar a mitad de camino de forma impredecible
-   (errores de red tipo `ECONNRESET`, archivos corruptos, etc.). Verifícalo
-   en el Explorador de Windows antes de instalar nada.
-2. **Clona/descarga el proyecto en una ruta SIN espacios en el nombre de
-   las carpetas.** Por ejemplo usa `C:\Proyectos\RefreshProCleanApp`, y
-   evita rutas como `C:\Users\Nombre Con Espacio\Desktop\...`. Si tu usuario
-   de Windows tiene espacio en el nombre (ej. "Windows 11"), no lo cambies —
-   simplemente coloca el proyecto directamente en `C:\Proyectos\` en vez del
-   Escritorio.
-3. **No necesitas Android Studio, SDK, ni emulador para probar la app.**
-   Solo necesitas Node.js y la app **Expo Go** en tu celular. (Android
-   Studio solo hace falta si además quieres usar un emulador en la PC en
-   vez de tu celular — es opcional, ver sección al final).
-4. **Usa siempre PowerShell** (no CMD) para los comandos de este README. En
-   Windows, PowerShell es la terminal por defecto en Android Studio y en la
-   mayoría de instalaciones recientes; si abres "Símbolo del sistema" (CMD)
-   en vez de PowerShell, algunos comandos como `Remove-Item` no funcionarán
-   (usarías `del`/`rmdir` en su lugar).
+> ⚠️ **Nota importante sobre Firebase:** en el estado actual del código de
+> ambas ramas (`BackEnd` y `REFRESH FINAL` en `FrontEnd`) **no existe
+> integración con Firebase** (ni Authentication ni Firestore/Realtime
+> Database). El login se implementa con un `AuthContext` propio en memoria
+> (React) y la persistencia real de datos usa **SQLite** en el cliente y
+> **SQL Server** en el backend. Este README documenta el proyecto tal como
+> está implementado; si el equipo agrega Firebase más adelante, esta
+> sección debe actualizarse con los pasos de configuración reales.
 
 ---
 
-## Requisitos previos
-- **Node.js 18 o superior** — verifica con `node -v` en una terminal. Si da
-  error, descárgalo de https://nodejs.org (versión LTS) e instálalo.
-- **npm** (viene incluido con Node.js).
-- La app **Expo Go** instalada en tu celular (Android o iOS) — disponible
-  gratis en Play Store / App Store.
-- Tu celular y tu computadora conectados a la **misma red Wi-Fi** (si tu
-  red bloquea la conexión directa, más abajo hay una alternativa con
-  "modo túnel").
+## 1. Requisitos
 
-## Instalación paso a paso
+### Backend (rama `BackEnd`)
+- **.NET SDK 10.0** o superior.
+- **SQL Server** (Express, Developer o LocalDB) accesible localmente.
+- Editor recomendado: Visual Studio 2022 o VS Code con la extensión de C#.
 
-**1. Descarga/descomprime el proyecto** en una ruta sin espacios, por
-ejemplo:
+### Frontend (rama `FrontEnd`, carpeta `REFRESH FINAL`)
+- **Node.js 18 o superior** (`node -v` para verificar).
+- **npm** (incluido con Node.js).
+- App **Expo Go** instalada en un celular Android o iOS (gratis en
+  Play Store / App Store), o **Android Studio** si se prefiere emulador.
+- Celular y computadora en la **misma red Wi-Fi** (o usar el modo túnel de
+  Expo, explicado más abajo).
+- Al menos 10-15 GB libres en disco para que `npm install` y el emulador (si
+  se usa) funcionen sin errores.
+
+---
+
+## 2. Instalación
+
+### 2.1 Backend
+```bash
+# Clonar el repositorio y cambiar a la rama de backend
+git clone https://github.com/ArturoU5/DesarrolloMovil.git
+cd DesarrolloMovil
+git checkout BackEnd
+
+# Restaurar dependencias NuGet
+dotnet restore
+
+# Aplicar/crear la base de datos con Entity Framework Core
+dotnet ef database update
 ```
-C:\Proyectos\RefreshProCleanApp
-```
 
-**2. Abre PowerShell y entra a esa carpeta:**
-```powershell
-cd C:\Proyectos\RefreshProCleanApp
-```
+### 2.2 Frontend
+```bash
+# Desde la raíz del repo, cambiar a la rama de frontend
+git checkout FrontEnd
+cd "REFRESH FINAL"
 
-**3. Instala las dependencias:**
-```powershell
+# Instalar dependencias
 npm install
-```
-Esto puede tardar 1-3 minutos. Si te sale un error de red (`ECONNRESET`),
-simplemente vuelve a correr `npm install` — casi siempre es un corte
-momentáneo de conexión.
 
-**3.1 (Opcional) Verifica que TypeScript compile sin errores:**
-```powershell
+# (Opcional) Verificar que TypeScript compile sin errores
 npm run typecheck
 ```
-No debería mostrar ningún error. Si lo hace, avisa al resto del equipo antes
-de seguir para no arrastrar el problema.
 
-## Ejecución
+> Recomendación: descarga/clona el proyecto en una ruta **sin espacios** en
+> el nombre de las carpetas (ej. `C:\Proyectos\DesarrolloMovil`), ya que
+> rutas con espacios pueden causar errores de Metro Bundler.
 
-**4. Inicia el proyecto:**
-```powershell
+---
+
+## 3. Configuración de Firebase
+
+**Este proyecto no utiliza Firebase.** No hay archivo `google-services.json`,
+`GoogleService-Info.plist` ni dependencias de `firebase`/`@react-native-firebase`
+en `package.json`. Los servicios que en otros proyectos suelen cubrirse con
+Firebase están resueltos así:
+
+| Necesidad | Cómo se resuelve en este proyecto |
+|---|---|
+| Autenticación / login | `AuthContext` propio (React Context + `useState`), en memoria, con dos roles: ADMIN (contraseña fija) y CLIENTE (nombre + teléfono) |
+| Base de datos en la nube (Firestore / Realtime DB) | No implementada. La persistencia real es **SQLite local** (cliente) y **SQL Server** (backend), no sincronizadas entre sí en esta entrega |
+| Backend / API | ASP.NET Core Web API propio, sobre SQL Server |
+
+Si en una entrega futura se integra Firebase, esta sección debería incluir:
+la creación del proyecto en Firebase Console, la descarga de
+`google-services.json`/`GoogleService-Info.plist`, la instalación de los
+paquetes `firebase`/`@react-native-firebase/app` y el código de
+inicialización correspondiente.
+
+---
+
+## 4. Cómo ejecutar el proyecto
+
+### 4.1 Ejecutar el backend
+```bash
+cd DesarrolloMovil        # rama BackEnd
+dotnet run
+```
+- La API queda disponible en la URL indicada en la consola (por defecto algo
+  como `http://localhost:5196`, ver `Properties/launchSettings.json`).
+- El archivo `lavanderia.http` incluido en el proyecto sirve para probar
+  peticiones rápidas desde VS Code/Visual Studio (extensión REST Client).
+
+### 4.2 Ejecutar el frontend
+```bash
+cd "REFRESH FINAL"        # rama FrontEnd
 npx expo start
 ```
-Esto muestra un **código QR** en la terminal.
+- Se muestra un **código QR** en la terminal.
+- Abre **Expo Go** en el celular y escanea el código (Android: botón "Scan
+  QR code" dentro de Expo Go; iOS: app Cámara).
+- Si el celular se queda cargando o muestra `Failed to download remote
+  update` (común en redes con aislamiento de clientes, típico de
+  universidades/oficinas), usa el modo túnel:
+  ```bash
+  npx expo start --tunnel
+  ```
+- Alternativa con emulador de Android: abre el emulador desde Android
+  Studio y, con `npx expo start` corriendo, presiona `a` en la terminal.
 
-**5. Abre la app Expo Go en tu celular** y escanea el código QR:
-- **Android**: dentro de Expo Go, botón "Scan QR code".
-- **iOS**: abre la app de Cámara y escanea el código (te ofrecerá abrir
-  Expo Go automáticamente).
-
-La app se instalará y ejecutará en tu celular en unos segundos, sin
-necesidad de compilar nada de forma nativa.
-
-### Si el celular se queda cargando o da "Failed to download remote update"
-
-Esto pasa cuando la red Wi-Fi no permite la conexión directa entre tu
-celular y tu PC (común en redes de universidades, oficinas, o routers con
-"aislamiento de clientes"). Solución: usa el modo túnel:
-```powershell
-npx expo start --tunnel
-```
-La primera vez te pedirá instalar un paquete adicional (`@expo/ngrok`) —
-acepta con `y`. Tarda un poco más en iniciar, pero funciona incluso si el
-celular está en otra red o en datos móviles.
+> En esta entrega, la app móvil **no consume el backend .NET**: la pantalla
+> de Catálogo consume una API REST pública externa (Fake Store API) y las
+> Solicitudes se guardan en SQLite local. El backend ASP.NET Core es un
+> proyecto independiente con su propio modelo de datos (`Usuarios`,
+> `Servicios`, `Reservas`) pensado como referencia/entregable de backend.
 
 ---
 
-## Cómo probar el flujo CRUD
+## 5. Cómo probar el login
 
-1. Abre la app: se muestra la pantalla de **login** con dos pestañas: "Soy
-   cliente" y "Soy personal".
+La app abre en la pantalla de **Login**, con dos pestañas:
 
-### Como cliente
-2. En la pestaña "Soy cliente", ingresa un nombre y un teléfono cualquiera
-   (no hay contraseña) → toca **Ingresar como cliente**.
-3. Verás "Mis solicitudes" — al principio vacío, salvo que uses el mismo
-   teléfono que alguna de las solicitudes de ejemplo (ver `seedData.js`:
-   `912345678`, `923456789`, `934567890`).
-4. Toca **+ Nueva solicitud** para crear una (tu nombre y teléfono ya vienen
-   prellenados y bloqueados). Completa dirección, tipo de servicio,
-   cantidad de prendas y precio estimado (se autosugiere al elegir el
-   servicio, pero puedes editarlo).
-5. Toca una solicitud para ver el detalle. Si está en estado **Pendiente**,
-   puedes editar la descripción o **cancelarla**. Si ya está "En atención" o
-   "Finalizado", esas opciones se ocultan (el cliente ya no puede
-   modificarla).
-6. Usa **Salir** para cerrar sesión y volver al login.
+- **Soy cliente**: ingresa un nombre y un teléfono válido (6 a 9 dígitos,
+  sin contraseña) y toca **Ingresar como cliente**.
+- **Soy personal**: ingresa la contraseña de prueba `admin123` y toca
+  **Ingresar como administrador**.
 
-### Como personal (administrador)
-7. En la pestaña "Soy personal", ingresa la contraseña de prueba
-   `admin123` → toca **Ingresar como administrador**.
-8. Verás el listado completo de **todas** las solicitudes de todos los
-   clientes, con buscador y filtros por estado.
-9. Puedes **crear** solicitudes a nombre de cualquier cliente, ver el
-   **detalle**, **cambiar el estado** (Pendiente / En atención /
-   Finalizado / Cancelado), **editar** la descripción y **eliminar**
-   cualquier solicitud.
-10. Usa **Salir** para cerrar sesión y volver al login (o desde la pestaña
-    **Perfil**).
+El rol autenticado se guarda en memoria (`AuthContext`) mientras la app está
+abierta; al cerrar sesión (**Salir**) se vuelve a la pantalla de login. No
+hay backend de autenticación real ni contraseñas por cliente: es una
+autenticación simplificada con fines académicos.
 
-> Nota: la autenticación es solo para fines de la demostración académica —
-> no hay contraseñas por cliente ni backend real. El rol se guarda en
-> memoria (`AuthContext`) mientras la app está abierta. Lo que **sí**
-> persiste entre reinicios son las solicitudes, guardadas en SQLite.
+---
 
-### Cómo probar la persistencia local (SQLite)
+## 6. Cómo probar el CRUD
 
-1. Inicia sesión (como cliente o como personal) y crea una solicitud
-   nueva.
-2. Cierra la app por completo (deslízala fuera de las apps recientes del
-   celular, no basta con solo minimizarla).
-3. Vuelve a abrir **Expo Go** y entra de nuevo a la app.
-4. Inicia sesión otra vez: la solicitud que creaste sigue ahí. Los datos
-   viven en un archivo `.db` dentro del almacenamiento de la app
-   (`infrastructure/database/db.ts`), no en memoria.
+El CRUD principal es el de **Solicitudes de servicio**, disponible según el
+rol:
 
-### Cómo probar el catálogo (consumo de API REST)
+**Como cliente:**
+1. Inicia sesión como cliente.
+2. Verás "Mis solicitudes" (vacío salvo que uses uno de los teléfonos de
+   ejemplo de `seedData.ts`: `912345678`, `923456789`, `934567890`).
+3. Toca **+ Nueva solicitud** (Create) para crear una.
+4. Toca una solicitud para ver el **detalle** (Read); si está en estado
+   *Pendiente* puedes editar la descripción (Update) o cancelarla.
 
-1. Entra a la pestaña **Catálogo** (disponible tanto para cliente como
-   para personal).
-2. Toca **Cargar productos**: se dispara una petición `GET` a una API
-   pública (Fake Store API) y se muestra un indicador de carga.
-3. Si hay conexión, verás la lista de productos con imagen, categoría y
+**Como personal (administrador):**
+1. Inicia sesión con la contraseña `admin123`.
+2. Verás el listado completo de todas las solicitudes, con buscador y
+   filtros por estado (Read/List).
+3. Puedes **crear** solicitudes a nombre de cualquier cliente (Create),
+   ver el **detalle**, **cambiar el estado** y **editar** la descripción
+   (Update), y **eliminar** cualquier solicitud (Delete).
+
+El backend ASP.NET Core expone además su propio CRUD (independiente del de
+la app móvil) sobre `Usuarios`, `Servicios` y `Reservas`, mediante los
+endpoints descritos en la sección siguiente.
+
+### Endpoints del backend (CRUD vía API REST)
+| Recurso | Método | Ruta | Acción |
+|---|---|---|---|
+| Usuarios | GET | `/api/usuarios` | Listar (filtro opcional `activo`) |
+| Usuarios | GET | `/api/usuarios/{id}` | Obtener detalle |
+| Usuarios | GET | `/api/usuarios/buscar?texto=` | Buscar |
+| Usuarios | POST | `/api/usuarios` | Crear |
+| Usuarios | PUT | `/api/usuarios/{id}` | Actualizar |
+| Usuarios | DELETE | `/api/usuarios/{id}` | Eliminar |
+| Servicios | GET/POST/PUT/DELETE | `/api/servicios[...]` | Igual patrón que Usuarios |
+| Reservas | GET/POST/PUT/DELETE | `/api/reservas[...]` | Igual patrón, incluye filtro por `estado` |
+
+Se pueden probar con el archivo `lavanderia.http`, con Postman/Insomnia, o
+con `curl`.
+
+---
+
+## 7. Cómo probar SQLite
+
+La persistencia local de las **Solicitudes** (y de los **Pedidos de
+producto** del catálogo) vive en SQLite, mediante `expo-sqlite`
+(`src/infrastructure/database/db.ts` y
+`src/infrastructure/repositories/`).
+
+1. Inicia sesión (como cliente o como personal) y crea una solicitud nueva.
+2. Cierra la app **por completo** (deslízala fuera de las apps recientes
+   del celular; no basta con minimizarla).
+3. Vuelve a abrir Expo Go y entra de nuevo a la app.
+4. Inicia sesión otra vez: la solicitud creada sigue ahí, confirmando que
+   los datos persisten en el archivo `refreshproclean.db` del
+   almacenamiento de la app, y no solo en memoria.
+
+Esquema principal creado en `db.ts`:
+- Tabla `solicitudes` (id, clienteNombre, telefono, direccion, servicioId,
+  usuarioId, cantidadPrendas, precio, prioridad, descripcion, estado,
+  fechaRegistro, fechaReserva).
+- Tabla `pedidos_productos` (id, clienteNombre, telefono, productoId,
+  productoTitulo, productoImagen, categoria, precioUnitario, cantidad,
+  estado, fechaRegistro).
+
+---
+
+## 8. Cómo probar el consumo de API REST
+
+La pantalla **Catálogo** (`src/presentation/screens/CatalogScreen.tsx`,
+lógica en `src/infrastructure/api/catalogoApi.ts`) consume la **Fake Store
+API** pública (`https://fakestoreapi.com/products`), filtrando solo ropa de
+hombre y mujer, y agrega un catálogo local de insumos de lavandería
+(detergentes, suavizantes, etc.).
+
+1. Entra a la pestaña **Catálogo** (disponible para cliente y personal).
+2. Toca **Cargar productos**: se dispara un `GET` real a la API pública y se
+   muestra un indicador de carga.
+3. Con conexión a internet, se listan los productos con imagen, categoría y
    precio.
-4. Para probar el estado de error, activa el modo avión antes de tocar
-   "Cargar productos" (o "Actualizar productos"): se mostrará un mensaje
-   de error con un botón **Reintentar**.
+4. Para probar el **estado de error**: activa el modo avión antes de tocar
+   "Cargar productos" (o "Actualizar productos"). Debe aparecer un mensaje
+   de error con botón **Reintentar**.
 
 ---
 
-## Arquitectura del proyecto
+## 9. Cómo probar Firestore o Realtime Database
 
-```
-src/
-├── domain/
-│   └── models/           # Interfaces y tipos: Usuario, Servicio, Solicitud (.ts)
-├── infrastructure/
-│   ├── database/
-│   │   └── db.ts         # Apertura de la BD SQLite + creación del esquema
-│   ├── repositories/
-│   │   └── solicitudesRepository.ts   # CRUD contra SQLite (todo el SQL vive aquí)
-│   ├── api/
-│   │   └── catalogoApi.ts             # Consumo GET de la API REST del catálogo
-│   ├── context/          # SolicitudesContext (sincroniza SQLite <-> estado) +
-│   │                      # AuthContext (login por rol) (.tsx)
-│   └── seedData.ts       # Datos semilla (se insertan en SQLite solo la 1ª vez)
-├── shared/                # Constantes y validaciones tipadas (.ts)
-└── presentation/
-    ├── components/        # Card, Chip, InputField, ConfirmDialog (.tsx)
-    ├── navigation/        # Tipos de navegación (types.ts)
-    └── screens/           # Login, Listado (admin), MisSolicitudes (cliente),
-                            # Crear, Detalle, Catalogo, Perfil (.tsx)
-App.tsx                    # Navegación: Auth (sin sesión) -> Tabs (ADMIN / CLIENTE)
-```
-
-Estructura basada en Clean Architecture:
-- **`presentation/`**: pantallas, componentes y navegación (sin lógica de negocio).
-- **`domain/`**: modelos, entidades y reglas de negocio.
-- **`infrastructure/`**: acceso a datos (SQLite, API REST), Context y reducers.
-  - `database/` + `repositories/`: toda la persistencia local (SQLite).
-  - `api/`: todo el consumo de servicios externos (REST).
-- **`shared/`**: utilidades, constantes y validaciones.
-
-### Persistencia y consumo de datos
-
-- **Solicitudes → SQLite** (`infrastructure/database`, `infrastructure/repositories`):
-  reemplaza el almacenamiento en memoria de la v1. El `SolicitudesContext`
-  ya no guarda el estado "real", solo una caché en memoria que se
-  sincroniza con la base de datos en cada creación/edición/eliminación,
-  y se vuelve a leer de SQLite cada vez que arranca la app.
-- **Catálogo → API REST** (`infrastructure/api/catalogoApi.ts`): un `fetch`
-  simple a una API pública (Fake Store API), sin guardarse en SQLite,
-  usado solo como catálogo de referencia (productos/insumos sugeridos).
-- **Servicios y usuarios**: se mantienen como datos semilla en memoria
-  (`seedData.ts`), ya que no forman parte del CRUD principal exigido por
-  esta entrega; solo las solicitudes necesitan persistencia real.
-
-Todo el proyecto está escrito en **TypeScript** (`.ts` / `.tsx`), con
-interfaces para cada modelo de datos (`Usuario`, `Servicio`, `Solicitud`),
-tipos union para `Estado` y `Prioridad`, y navegación tipada con
-`NativeStackScreenProps`.
-
-## Hooks utilizados
-- `useState`: manejo de formularios (crear/editar), login, filtros de búsqueda
-  y estados de carga/error del catálogo REST.
-- `useEffect`: carga inicial de solicitudes desde SQLite al montar la app.
-- `useReducer` + `useContext`: caché en memoria de las solicitudes,
-  sincronizada con SQLite en cada operación (CRUD) a nivel de toda la app.
-- `useCallback` / `useMemo`: memorización de funciones de acceso a datos y
-  de cálculos derivados (conteo de solicitudes por estado).
-
-## Estados de una solicitud
-`PENDIENTE` → `EN_ATENCION` → `FINALIZADO`, o `CANCELADO` en cualquier
-punto anterior a `FINALIZADO`. El cliente solo puede pasar su propia
-solicitud a `CANCELADO` (no elimina el registro); el personal puede
-cambiar a cualquier estado o eliminar en forma permanente.
-
-## Notas
-- El esquema SQL `SQLServerLavanderia.sql` se usó únicamente como referencia
-  del modelo de datos (campos y relaciones).
-- **v1 → v2**: la persistencia pasó de memoria (`useState`/`useReducer`) a
-  **SQLite** (`expo-sqlite`), y se agregó consumo de una **API REST**
-  pública (Fake Store API) para la pantalla de Catálogo, además de una
-  pantalla de Perfil. La navegación se reorganizó con **tabs**
-  (`@react-navigation/bottom-tabs`) para dar acceso directo a Solicitudes,
-  Catálogo y Perfil.
-- Se eligió **Expo** (en vez de React Native CLI puro / "bare") para que
-  todo el equipo pueda ejecutar y probar la app en sus propios celulares sin
-  necesidad de configurar Android Studio, SDK o emuladores en cada máquina.
-  Sigue siendo 100% React Native: los componentes, hooks y estructura del
-  proyecto son los mismos que exige la rúbrica.
+**No aplica.** Como se indicó en la sección 3, este proyecto no integra
+Firestore ni Realtime Database en su estado actual. La única base de datos
+en la nube/servidor es **SQL Server**, consumida por el backend ASP.NET
+Core (no directamente por la app móvil en esta entrega). Los pasos para
+probar esa capa son los mismos del CRUD del backend descritos en la
+sección 6.
 
 ---
 
-## Solución de problemas comunes
+## 10. Cómo generar APK/AAB o ejecutar en dispositivo/emulador
+
+### Ejecutar en dispositivo físico (recomendado para desarrollo)
+No requiere Android Studio ni SDK: solo Node.js y la app Expo Go.
+```bash
+npx expo start
+```
+Escanea el código QR con Expo Go (Android) o la Cámara (iOS).
+
+### Ejecutar en emulador Android
+1. Instala Android Studio y crea un emulador desde `Device Manager`.
+2. Inicia el emulador y espera a que cargue por completo.
+3. Con `npx expo start` corriendo, presiona `a` en la terminal.
+
+### Generar un instalable APK/AAB (build nativo)
+El proyecto incluye la carpeta nativa `android/` (generada con Expo
+prebuild), por lo que puede compilarse de forma nativa con Gradle, o usando
+EAS Build (recomendado por el propio README original del frontend):
+```bash
+npm install -g eas-cli
+eas login
+eas build -p android --profile preview   # genera un APK de prueba
+# eas build -p android --profile production  # genera un AAB para Play Store
+```
+Alternativamente, de forma local con Gradle (dentro de `android/`):
+```bash
+./gradlew assembleDebug     # genera un APK de depuración
+```
+
+### Publicar el backend
+Para ejecutar el backend fuera de modo desarrollo:
+```bash
+dotnet publish -c Release
+```
+El resultado puede desplegarse en IIS, un contenedor Docker o cualquier
+hosting compatible con ASP.NET Core.
+
+---
+
+## 11. Arquitectura y tecnologías
+
+```
+Backend (rama BackEnd)              Frontend (rama FrontEnd / REFRESH FINAL)
+------------------------            -------------------------------------------
+ASP.NET Core Web API (.NET 10)      React Native + TypeScript (Expo 54)
+Entity Framework Core               React Navigation (stack + bottom tabs)
+SQL Server (RefreshProCleanDB)      SQLite local (expo-sqlite)
+Controllers: Usuarios, Servicios,   Consumo de API REST pública (Fake Store)
+             Reservas               Clean Architecture: domain / infrastructure
+                                     / presentation / shared
+```
+
+## 12. Solución de problemas comunes (frontend)
 
 | Error | Causa | Solución |
 |---|---|---|
-| `ECONNRESET` durante `npm install` | Corte de red momentáneo, o poco espacio en disco | Verifica que tengas 10+ GB libres, y vuelve a correr `npm install` |
-| `Project is incompatible with this version of Expo Go` | La versión de Expo Go de tu celular no coincide con la del proyecto | Corre `npx expo install expo@latest` y luego `npx expo install --fix` |
-| `Failed to download remote update` / se queda cargando en el celular | Problema de red local (Wi-Fi bloquea la conexión) | Usa `npx expo start --tunnel` |
-| `Cannot read properties of undefined (reading 'transformFile')` | Ruta del proyecto con espacios en el nombre de alguna carpeta | Mueve el proyecto a una ruta sin espacios, ej. `C:\Proyectos\RefreshProCleanApp` |
-| `Cannot find module 'babel-preset-expo'` | Falta esa dependencia | Corre `npm install --save-dev babel-preset-expo` |
-| El emulador de Android Studio no inicia / error de espacio | Poco espacio en disco | Libera espacio (mínimo 10-15 GB) antes de abrir el emulador |
-| Cualquier otro error raro después de reinstalar | Caché corrupta de una instalación anterior | Borra `node_modules` y la carpeta `.expo`, y vuelve a correr `npm install` |
+| `ECONNRESET` durante `npm install` | Corte de red o poco espacio en disco | Verifica 10+ GB libres y repite `npm install` |
+| `Project is incompatible with this version of Expo Go` | Versión de Expo Go desactualizada | `npx expo install expo@latest` y luego `npx expo install --fix` |
+| `Failed to download remote update` | Wi-Fi bloquea la conexión directa | `npx expo start --tunnel` |
+| `Cannot read properties of undefined (reading 'transformFile')` | Ruta del proyecto con espacios | Mover el proyecto a una ruta sin espacios |
+| `Cannot find module 'babel-preset-expo'` | Falta dependencia | `npm install --save-dev babel-preset-expo` |
 
-Comandos de limpieza completa (si algo se ve raro y no sabes por qué):
-```powershell
-Remove-Item -Recurse -Force node_modules
-Remove-Item -Recurse -Force .expo -ErrorAction SilentlyContinue
+Limpieza completa si algo falla sin causa clara:
+```bash
+rm -rf node_modules .expo
 npm install
 npx expo start -c
 ```
 
----
-
-## Alternativa: usar un emulador de Android en vez del celular (opcional)
-
-No es necesario, pero si prefieres probar en un emulador en tu PC en vez de
-tu celular:
-
-1. Instala **Android Studio** y crea un emulador desde `Device Manager`
-   (necesitas 10+ GB libres para que el emulador funcione bien).
-2. Inicia el emulador (▶️) y espera que cargue completamente.
-3. Con `npx expo start` corriendo, presiona la tecla `a` en la terminal —
-   Expo detecta el emulador abierto y ejecuta la app ahí automáticamente.
-
-## Cómo generar un instalable (APK) más adelante (opcional)
-Si en algún momento necesitan un `.apk` para instalar sin Expo Go (por
-ejemplo, para la entrega final si el docente lo pide en ese formato), pueden
-usar EAS Build:
-```bash
-npm install -g eas-cli
-eas login
-eas build -p android --profile preview
-```
-Esto no es necesario para el desarrollo ni para las demostraciones en clase.
+## Integrantes del equipo
+- Guillermo Arturo Ugaz Montesinos
+- Omar Alexander Córdova Pintado
+- Marco Antonio Suarez Siesquen
