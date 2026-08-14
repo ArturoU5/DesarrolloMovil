@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
 import React from 'react';
-import { StatusBar, Text } from 'react-native';
+import { StatusBar, Text, View, ActivityIndicator } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -137,7 +137,15 @@ function ClienteRoot() {
  * autenticación: todo vive en AuthContext, en memoria.
  */
 function RootNavigator() {
-  const { auth } = useAuth();
+  const { auth, cargandoAuth } = useAuth();
+
+  if (cargandoAuth) {
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: COLORES.fondo }}>
+        <ActivityIndicator size="large" color={COLORES.primario} />
+      </View>
+    );
+  }
 
   if (!auth) {
     return (

@@ -11,6 +11,7 @@ interface InputFieldProps {
   keyboardType?: KeyboardTypeOptions;
   multiline?: boolean;
   editable?: boolean;
+  secureTextEntry?: boolean;
 }
 
 export default function InputField({
@@ -22,6 +23,7 @@ export default function InputField({
   keyboardType = 'default',
   multiline = false,
   editable = true,
+  secureTextEntry = false,
 }: InputFieldProps) {
   return (
     <View style={styles.container}>
@@ -40,6 +42,8 @@ export default function InputField({
         keyboardType={keyboardType}
         multiline={multiline}
         editable={editable}
+        secureTextEntry={secureTextEntry}
+        autoCapitalize={secureTextEntry || keyboardType === 'email-address' ? 'none' : 'sentences'}
       />
       {error ? <Text style={styles.errorText}>{error}</Text> : null}
     </View>

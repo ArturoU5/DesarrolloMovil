@@ -13,37 +13,54 @@ import InputField from '../components/InputField';
 import { useAuth } from '../../infrastructure/context/AuthContext';
 import { COLORES } from '../../shared/constants';
 
-type Tab = 'CLIENTE' | 'ADMIN';
+type Modo = 'LOGIN' | 'REGISTRO';
 
+/**
+ * Login real con Firebase Authentication (correo y contraseña).
+ * - "Iniciar sesión" sirve tanto para clientes como para el personal
+ *   administrativo: el rol se determina automáticamente según el
+ *   correo (ver AuthContext -> ADMIN_EMAIL). No hay pestañas separadas
+ *   porque ya no hace falta: Firebase decide quién es quién.
+ * - "Crear cuenta" es solo para clientes nuevos (el usuario admin se
+ *   crea una única vez desde Firebase Console).
+ */
 export default function LoginScreen() {
-  const { loginAdmin, loginCliente } = useAuth();
-  const [tab, setTab] = useState<Tab>('CLIENTE');
+  const { loginConCorreo, registrarCliente } = useAuth();
+  const [modo, setModo] = useState<Modo>('LOGIN');
+  const [enviando, setEnviando] = useState(false);
 
-  // Formulario cliente
   const [nombre, setNombre] = useState('');
   const [telefono, setTelefono] = useState('');
-  const [errorCliente, setErrorCliente] = useState<string | null>(null);
+  const [correo, setCorreo] = useState('');
+  const [contrasena, setContrasena] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
-  // Formulario admin
-  const [password, setPassword] = useState('');
-  const [errorAdmin, setErrorAdmin] = useState<string | null>(null);
-
-  const handleLoginCliente = () => {
-    const resultado = loginCliente(nombre, telefono);
-    if (!resultado.ok) {
-      setErrorCliente(resultado.error ?? 'Error desconocido.');
-      return;
-    }
-    setErrorCliente(null);
+  const cambiarModo = (nuevoModo: Modo) => {
+    setModo(nuevoModo);
+    setError(null);
   };
 
-  const handleLoginAdmin = () => {
-    const resultado = loginAdmin(password);
-    if (!resultado.ok) {
-      setErrorAdmin(resultado.error ?? 'Error desconocido.');
+  const handleSubmit = async () => {
+    setError(null);
+
+    if (!correo.trim() || !contrasena) {
+      setError('Ingresa tu correo y contraseña.');
       return;
     }
-    setErrorAdmin(null);
+
+    setEnviando(true);
+    const resultado =
+      modo === 'LOGIN'
+        ? await loginConCorreo(correo, contrasena)
+        : await registrarCliente(nombre, telefono, correo, contrasena);
+    setEnviando(false);
+
+    if (!resultado.ok) {
+      setError(resultado.error ?? 'Ocurrió un error. Intenta nuevamente.');
+    }
+    // Si fue exitoso, no hace falta navegar manualmente: RootNavigator
+    // (App.tsx) cambia de pantalla solo, en cuanto Firebase confirma la
+    // sesión (onAuthStateChanged en AuthContext).
   };
 
   return (
@@ -52,10 +69,7 @@ export default function LoginScreen() {
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <ScrollView
-          contentContainerStyle={styles.scroll}
-          keyboardShouldPersistTaps="handled"
-        >
+        <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled">
           <Text style={styles.logo}>🧺</Text>
           <Text style={styles.title}>RefreshProClean</Text>
           <Text style={styles.subtitle}>
@@ -64,29 +78,30 @@ export default function LoginScreen() {
 
           <View style={styles.tabs}>
             <TouchableOpacity
-              style={[styles.tabBtn, tab === 'CLIENTE' && styles.tabBtnActivo]}
-              onPress={() => setTab('CLIENTE')}
+              style={[styles.tabBtn, modo === 'LOGIN' && styles.tabBtnActivo]}
+              onPress={() => cambiarModo('LOGIN')}
             >
-              <Text
-                style={[styles.tabText, tab === 'CLIENTE' && styles.tabTextActivo]}
-              >
-                Soy cliente
+              <Text style={[styles.tabText, modo === 'LOGIN' && styles.tabTextActivo]}>
+                Iniciar sesión
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.tabBtn, tab === 'ADMIN' && styles.tabBtnActivo]}
-              onPress={() => setTab('ADMIN')}
+              style={[styles.tabBtn, modo === 'REGISTRO' && styles.tabBtnActivo]}
+              onPress={() => cambiarModo('REGISTRO')}
             >
-              <Text style={[styles.tabText, tab === 'ADMIN' && styles.tabTextActivo]}>
-                Soy personal
+              <Text style={[styles.tabText, modo === 'REGISTRO' && styles.tabTextActivo]}>
+                Crear cuenta
               </Text>
             </TouchableOpacity>
           </View>
 
           <View style={styles.card}>
-            {tab === 'CLIENTE' ? (
+            <Text style={styles.cardTitle}>
+              {modo === 'LOGIN' ? 'Ingresa a tu cuenta' : 'Regístrate como cliente'}
+            </Text>
+
+            {modo === 'REGISTRO' && (
               <>
-                <Text style={styles.cardTitle}>Ingresa tus datos</Text>
                 <InputField
                   label="Nombre completo"
                   value={nombre}
@@ -99,35 +114,45 @@ export default function LoginScreen() {
                   onChangeText={setTelefono}
                   placeholder="Ej. 987654321"
                   keyboardType="phone-pad"
-                  error={errorCliente}
                 />
-                <TouchableOpacity style={styles.botonIngresar} onPress={handleLoginCliente}>
-                  <Text style={styles.botonIngresarTexto}>Ingresar como cliente</Text>
-                </TouchableOpacity>
-                <Text style={styles.nota}>
-                  No necesitas contraseña. Usaremos tu nombre y teléfono para
-                  mostrarte únicamente tus propias solicitudes.
-                </Text>
-              </>
-            ) : (
-              <>
-                <Text style={styles.cardTitle}>Acceso del personal</Text>
-                <InputField
-                  label="Contraseña"
-                  value={password}
-                  onChangeText={setPassword}
-                  placeholder="Ingresa la contraseña"
-                  error={errorAdmin}
-                />
-                <TouchableOpacity style={styles.botonIngresar} onPress={handleLoginAdmin}>
-                  <Text style={styles.botonIngresarTexto}>Ingresar como administrador</Text>
-                </TouchableOpacity>
-                <Text style={styles.nota}>
-                  Contraseña de prueba para la demostración:{' '}
-                  <Text style={{ fontWeight: '700' }}>admin123</Text>
-                </Text>
               </>
             )}
+
+            <InputField
+              label="Correo electrónico"
+              value={correo}
+              onChangeText={setCorreo}
+              placeholder="tucorreo@ejemplo.com"
+              keyboardType="email-address"
+            />
+            <InputField
+              label="Contraseña"
+              value={contrasena}
+              onChangeText={setContrasena}
+              placeholder="Mínimo 6 caracteres"
+              secureTextEntry
+              error={error}
+            />
+
+            <TouchableOpacity
+              style={[styles.botonIngresar, enviando && styles.botonDeshabilitado]}
+              onPress={handleSubmit}
+              disabled={enviando}
+            >
+              <Text style={styles.botonIngresarTexto}>
+                {enviando
+                  ? 'Un momento...'
+                  : modo === 'LOGIN'
+                  ? 'Iniciar sesión'
+                  : 'Crear cuenta'}
+              </Text>
+            </TouchableOpacity>
+
+            <Text style={styles.nota}>
+              {modo === 'LOGIN'
+                ? '¿Eres cliente nuevo? Toca "Crear cuenta" arriba.'
+                : 'El personal administrativo no se registra aquí: ya tiene una cuenta creada.'}
+            </Text>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -186,6 +211,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 4,
   },
+  botonDeshabilitado: { opacity: 0.6 },
   botonIngresarTexto: { color: '#fff', fontWeight: '700' },
   nota: {
     fontSize: 12,
